@@ -1,25 +1,43 @@
 import { Component } from 'react';
-import axios from 'axios';
 
 import Searchbar from './Components/Searchbar';
 import ImageGallery from './Components/ImageGallery';
+import Button from './Components/Button';
 
-// axios.defaults.headers.common['Authorization'] =
-//   'Bearer 19734316-10978fed4d6ca650a445cb4b9';
+import imageFinderApi from './services/image-finder-api';
 
 class App extends Component {
   state = {
     images: [],
+    currentPage: 1,
+    searchQuery: '',
   };
 
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.searchQuery !== this.state.searchQuery) {
+      this.fetchImages();
+    }
+
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: 'smooth',
+    });
+  }
+
   onChangeQuery = query => {
-    axios
-      .get(
-        `https://pixabay.com/api/?q=${query}&page=1&key=19734316-10978fed4d6ca650a445cb4b9&image_type=photo&orientation=horizontal&per_page=12`,
-      )
-      .then(({ data }) => {
-        this.setState({ images: data.hits });
-      });
+    this.setState({ searchQuery: query, currentPage: 1, images: [] });
+  };
+
+  fetchImages = () => {
+    const { currentPage, searchQuery } = this.state;
+    const options = { searchQuery, currentPage };
+
+    imageFinderApi.fetchImages(options).then(images => {
+      this.setState(prevState => ({
+        images: [...prevState.images, ...images],
+        currentPage: prevState.currentPage + 1,
+      }));
+    });
   };
 
   render() {
@@ -30,6 +48,8 @@ class App extends Component {
         <Searchbar onSubmit={this.onChangeQuery} />
 
         <ImageGallery images={images} />
+
+        {images.length > 0 && <Button onClick={this.fetchImages} />}
       </div>
     );
   }
