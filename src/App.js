@@ -5,6 +5,7 @@ import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 import Searchbar from './components/Searchbar';
 import ImageGallery from './components/ImageGallery';
 import Button from './components/Button';
+import Modal from './components/Modal';
 
 import imageFinderApi from './services/image-finder-api';
 
@@ -15,7 +16,14 @@ class App extends Component {
     searchQuery: '',
     isLoading: false,
     error: null,
+    showModal: false,
+    bigImageUrl: '',
   };
+
+  componentDidMount() {
+    window.addEventListener('click', this.handleOnImageClick);
+    console.log('Зарегистрировали обработчик клика');
+  }
 
   componentDidUpdate(prevProps, prevState) {
     if (prevState.searchQuery !== this.state.searchQuery) {
@@ -28,12 +36,18 @@ class App extends Component {
     });
   }
 
+  componentWillUnmount() {
+    window.removeEventListener('click', this.handleOnImageClick);
+    console.log('Убрали обработчик клика');
+  }
+
   onChangeQuery = query => {
     this.setState({
       searchQuery: query,
       currentPage: 1,
       images: [],
       error: null,
+      bigImageUrl: '',
     });
   };
 
@@ -55,8 +69,26 @@ class App extends Component {
       .finally(() => this.setState({ isLoading: false }));
   };
 
+  handleOnImageClick = event => {
+    const { images, showModal } = this.state;
+
+    if (event.target.nodeName === 'IMG' && !showModal) {
+      const clickedImage = images.find(
+        image => image.webformatURL === event.target.src,
+      );
+
+      this.setState({ bigImageUrl: clickedImage.largeImageURL });
+
+      this.toggleModal();
+    }
+  };
+
+  toggleModal = () => {
+    this.setState(({ showModal }) => ({ showModal: !showModal }));
+  };
+
   render() {
-    const { images, isLoading } = this.state;
+    const { images, isLoading, showModal, bigImageUrl } = this.state;
     const shouldRenderLoadMoreButton = images.length > 0 && !isLoading;
 
     return (
@@ -70,6 +102,8 @@ class App extends Component {
         )}
 
         {shouldRenderLoadMoreButton && <Button onClick={this.fetchImages} />}
+
+        {showModal && <Modal onClose={this.toggleModal} url={bigImageUrl} />}
       </div>
     );
   }

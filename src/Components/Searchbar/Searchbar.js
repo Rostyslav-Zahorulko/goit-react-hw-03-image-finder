@@ -10,13 +10,15 @@ class Searchbar extends Component {
   };
 
   handleSubmit = event => {
-    const { query } = this.state;
-
     event.preventDefault();
 
-    this.props.onSubmit(query);
+    const { query } = this.state;
 
-    this.setState({ query: '' });
+    if (query !== '') {
+      this.props.onSubmit(query);
+
+      this.setState({ query: '' });
+    }
   };
 
   render() {
