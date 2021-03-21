@@ -1,12 +1,10 @@
 import { Component } from 'react';
 import Loader from 'react-loader-spinner';
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
-
 import Searchbar from './components/Searchbar';
 import ImageGallery from './components/ImageGallery';
 import Button from './components/Button';
 import Modal from './components/Modal';
-
 import imageFinderApi from './services/image-finder-api';
 
 class App extends Component {
@@ -22,7 +20,6 @@ class App extends Component {
 
   componentDidMount() {
     window.addEventListener('click', this.handleOnImageClick);
-    console.log('Зарегистрировали обработчик клика');
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -38,7 +35,6 @@ class App extends Component {
 
   componentWillUnmount() {
     window.removeEventListener('click', this.handleOnImageClick);
-    console.log('Убрали обработчик клика');
   }
 
   onChangeQuery = query => {
@@ -78,7 +74,6 @@ class App extends Component {
       );
 
       this.setState({ bigImageUrl: clickedImage.largeImageURL });
-
       this.toggleModal();
     }
   };
@@ -88,14 +83,20 @@ class App extends Component {
   };
 
   render() {
-    const { images, isLoading, showModal, bigImageUrl } = this.state;
+    const {
+      images,
+      searchQuery,
+      isLoading,
+      showModal,
+      bigImageUrl,
+    } = this.state;
     const shouldRenderLoadMoreButton = images.length > 0 && !isLoading;
 
     return (
       <div>
         <Searchbar onSubmit={this.onChangeQuery} />
 
-        <ImageGallery images={images} />
+        <ImageGallery images={images} tag={searchQuery} />
 
         {isLoading && (
           <Loader type="ThreeDots" color="#00BFFF" width={100} height={100} />
@@ -103,7 +104,11 @@ class App extends Component {
 
         {shouldRenderLoadMoreButton && <Button onClick={this.fetchImages} />}
 
-        {showModal && <Modal onClose={this.toggleModal} url={bigImageUrl} />}
+        {showModal && (
+          <Modal onClose={this.toggleModal}>
+            <img src={bigImageUrl} alt={searchQuery} width={1000} />
+          </Modal>
+        )}
       </div>
     );
   }
