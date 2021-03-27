@@ -16,7 +16,7 @@
 
 import axios from 'axios';
 
-const BASE_URL = 'https://pixabay.com/api/';
+const BASE_URL = 'https://pixabay.com/api';
 const API_KEY = '19734316-10978fed4d6ca650a445cb4b9';
 
 axios.defaults.baseURL = BASE_URL;
@@ -31,7 +31,7 @@ const fetchImages = async ({
   currentPage = 1,
   perPage = 12,
 }) => {
-  const response = await axios.get('', {
+  const response = await axios.get('/', {
     params: { q: searchQuery, page: currentPage, per_page: perPage },
   });
 
@@ -41,5 +41,3 @@ const fetchImages = async ({
 const imageFinderApi = { fetchImages };
 
 export default imageFinderApi;
-
-// export default { fetchImages };
